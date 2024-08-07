@@ -6,10 +6,68 @@ const sendMail = require('../helpers/email');
 const html = require('../helpers/html');
 const forgotPasswordhtml= require("../helpers/forgotPasswordHTML");
 
+// exports.signUpUser = async (req, res) => {
+//     try {
+//         const { fullName, email, password } = req.body;
+//         const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+//         // Validating inputs
+//         if (!fullName || fullName.trim().length === 0) {
+//             return res.status(400).json({ message: "Full name field cannot be empty" });
+//         }
+
+//         if (!email || !emailPattern.test(email)) {
+//             return res.status(400).json({ message: "Invalid email" });
+//         }
+
+//         const existingEmail = await userModel.findOne({ email });
+//         if (existingEmail) {
+//             return res.status(400).json({ message: "User with this email already exists" });
+//         }
+
+//         // Using bcrypt to salt and hash the password
+//         const salt = await bcrypt.genSalt(10);
+//         const hashedPassword = await bcrypt.hash(password, salt);
+
+//         const user = new userModel({
+//             fullName,
+//             email: email.toLowerCase(),
+//             password: hashedPassword,
+//         });
+
+//         const createdUser = await user.save();
+
+//         // Using JWT to sign the user in
+//         const userToken = jwt.sign({ id: createdUser._id, email: createdUser.email }, process.env.JWT_SECRET, { expiresIn: "3 minutes" });
+
+//         const verifyLink = `${req.protocol}://${req.get("host")}/api/v1/verify/${createdUser._id}/${userToken}`;
+
+//         sendMail({
+//             subject: "Kindly verify your email.",
+//             email: createdUser.email,
+//             html: html(verifyLink, createdUser.fullName)
+//         });
+
+//         res.status(201).json({
+//             message: `Welcome ${createdUser.fullName}, kindly check your email to access the link to verify your email.`,
+//             data: createdUser
+//         });
+
+//     } catch (error) {
+//         res.status(500).json({
+//             message: error.message
+//         });
+//     }
+// };
+
+
+
+
 exports.signUpUser = async (req, res) => {
     try {
         const { fullName, email, password } = req.body;
-        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        const emailPattern = /^[^\s@]+@[^\s@]+\.(com|net|org|edu|gov|mil|co\.[a-zA-Z]{2,}|[a-zA-Z]{2,})$/;
+        const passwordPattern = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$/;
 
         // Validating inputs
         if (!fullName || fullName.trim().length === 0) {
@@ -18,6 +76,12 @@ exports.signUpUser = async (req, res) => {
 
         if (!email || !emailPattern.test(email)) {
             return res.status(400).json({ message: "Invalid email" });
+        }
+
+        if (!password || !passwordPattern.test(password)) {
+            return res.status(400).json({ 
+                message: "Password must be at least 6 characters long, contain at least one number, one uppercase letter, one lowercase letter, and one special character" 
+            });
         }
 
         const existingEmail = await userModel.findOne({ email });
