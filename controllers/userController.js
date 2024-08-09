@@ -138,6 +138,7 @@ exports.verifyEmail = async (req, res) => {
         jwt.verify(token, process.env.JWT_SECRET, async (error) => {
             if (error) {
                 const link = `${req.protocol}://${req.get("host")}/api/v1/newemail/${findUser._id}`;
+               
                 await sendMail({
                     subject: 'Kindly verify your email',
                     email: findUser.email,
@@ -248,7 +249,7 @@ exports.makeAdmin= async(req,res)=>{
 
 exports.getAllUsers = async(req,res)=>{
     try {
-        const allUsers = await userModel.find().populate('todo').exec();
+        const allUsers = (await userModel.find().populate('todo').exec()).sort({createdAt:-1});
        
         res.status(200).json({
             message:`list of all users:`,
@@ -423,7 +424,19 @@ exports.getUserWithTodos = async (req, res) => {
     }
 };
 
-
+exports.logOut = (req, res) => {
+    try {
+        res.cookie('token', '', { expires: new Date(0), httpOnly: true });
+        res.status(200).json({
+            message: 'Logout successful',
+            redirectURL: 'http://localhost:5050/login'
+        });
+    } catch (error) {
+        res.status(500).json({
+            message: error.message
+        });
+    }
+};
 
 
 

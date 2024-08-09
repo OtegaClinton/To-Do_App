@@ -1,6 +1,7 @@
 require("dotenv").config();
 const jwt = require("jsonwebtoken");
 const userModel = require("../models/userModel");
+const todoModel = require("../models/todoModel");
 
 exports.authorization = async (req, res, next) => {
     try {
@@ -35,3 +36,31 @@ exports.authorization = async (req, res, next) => {
         });
     }
 };
+
+
+
+
+exports.authenticateUser = (req, res, next) => {
+    // Extract token from Authorization header
+    const authHeader = req.headers.authorization;
+    
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return res.status(401).json({ message: 'Authentication required,please log in again.' });
+    }
+
+    const token = authHeader.split(' ')[1];
+
+    if (!token) {
+        return res.status(401).json({ message: 'Authentication required' });
+    }
+
+    try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        req.user = { userId: decoded.id }; // Add userId to the request object
+        next();
+    } catch (error) {
+        res.status(500).json({ message: error.message});
+    }
+};
+
+

@@ -5,13 +5,14 @@ const userModel = require("../models/userModel");
 
 exports.createTodo = async (req, res) => {
     try {
-        const { title, content, user } = req.body;
+        const { userId } = req.user; // Correctly extract userId from req.user
+        const { title, content } = req.body;
 
         // Create the todo
-        const newTodo = await todoModel.create({ title, content, user });
+        const newTodo = await todoModel.create({ title, content, user: userId });
 
         // Update the user's todo array
-        await userModel.findByIdAndUpdate( user,{ $push: { todo: newTodo._id } }, { new: true});
+        await userModel.findByIdAndUpdate(userId, { $push: { todo: newTodo._id } }, { new: true });
 
         res.status(201).json({
             message: "Todo content created successfully",
@@ -23,6 +24,7 @@ exports.createTodo = async (req, res) => {
         });
     }
 };
+
 
 // exports.createContentTodo = async(req,res)=>{
 //     try {

@@ -11,19 +11,22 @@ const {
     changePassword,
     forgotPassword,
     resetPassword,
-    getUserWithTodos
+    getUserWithTodos,
+    logOut
 } = require("../controllers/userController");
-const {authorization} = require("../helpers/authorization");
+const {authorization,authenticateUser} = require("../helpers/authorization");
+
 
 router.route("/signUpUser").post(signUpUser);
 router.get("/verify/:id/:token",verifyEmail);
 router.get("/newemail/:id",newEmail);
 
 router.post("/logIn",logIn);
-router.get('/users', authorization, getAllUsers);
-router.get('/deleteuser', authorization, deleteUser);
-router.put("/makeadmin/:id",authorization,makeAdmin);
-router.get('/user/:id', getUserWithTodos);
+router.get('/users',authenticateUser, authorization, getAllUsers);
+router.delete('/deleteuser/:id',authenticateUser, authorization, deleteUser);
+router.put("/makeadmin/:id",authenticateUser,authorization,makeAdmin);
+router.get('/user/:id',authenticateUser, getUserWithTodos);
+router.post('/logout',authenticateUser, logOut);
 
 
 
@@ -34,11 +37,11 @@ router.post('/resetpassword/:token', resetPassword);
 
 
 
-router.post("/createcontent",createTodo);
-router.get('/content/:id', getOne);
-router.get('/contents', getAll);
-router.put('/content/:id', updateContent);
-router.delete('/content/:id', deleteContent);
+router.post("/createcontent",authenticateUser,createTodo);
+router.get('/content/:id',authenticateUser, getOne);
+router.get('/contents',authenticateUser, getAll);
+router.put('/content/:id',authenticateUser, updateContent);
+router.delete('/content/:id',authenticateUser, deleteContent);
 
 
 
